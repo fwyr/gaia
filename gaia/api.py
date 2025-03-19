@@ -31,21 +31,21 @@ class PlusSearchRequest:
         for subheading in subheadings:
             subheading.decompose()
 
-    def get_search_page(self):
+    def get_search_page(self, page=1):
         query_parsed = "%20".join(self.query.split(" "))
         if self.search_type.lower() == "title":
             search_url = (
-                f"https://libgen.li/index.php?req={query_parsed}&columns%5B%5D=t&objects%5B%5D=f&objects%5B%5D=e&objects%5B%5D=s&objects%5B%5D=a&objects%5B%5D=p&objects%5B%5D=w&topics%5B%5D=l&topics%5B%5D=r&res=25&filesuns=all&curtab=f"
+                f"https://libgen.li/index.php?req={query_parsed}&columns%5B%5D=t&objects%5B%5D=f&objects%5B%5D=e&objects%5B%5D=s&objects%5B%5D=a&objects%5B%5D=p&objects%5B%5D=w&topics%5B%5D=l&topics%5B%5D=r&res=25&filesuns=all&page={page}"
             )
         elif self.search_type.lower() == "author":
             search_url = (
-                f"https://libgen.li/index.php?req={query_parsed}&columns%5B%5D=a&objects%5B%5D=f&objects%5B%5D=e&objects%5B%5D=s&objects%5B%5D=a&objects%5B%5D=p&objects%5B%5D=w&topics%5B%5D=l&topics%5B%5D=r&res=25&filesuns=all"
+                f"https://libgen.li/index.php?req={query_parsed}&columns%5B%5D=a&objects%5B%5D=f&objects%5B%5D=e&objects%5B%5D=s&objects%5B%5D=a&objects%5B%5D=p&objects%5B%5D=w&topics%5B%5D=l&topics%5B%5D=r&res=25&filesuns=allpage={page}"
             )
         search_page = requests.get(search_url, headers=self.headers)
         return search_page
 
-    def aggregate_request_data(self):
-        search_page = self.get_search_page()
+    def aggregate_request_data(self, page=1):
+        search_page = self.get_search_page(page)
         soup = BeautifulSoup(search_page.text, "lxml")
         self.strip_i_tag_from_soup(soup)
 
@@ -118,7 +118,7 @@ class SearchRequest:
         search_page = requests.get(search_url)
         return search_page
 
-    def aggregate_request_data(self):
+    def aggregate_request_data(self, page=1):
         search_page = self.get_search_page()
         soup = BeautifulSoup(search_page.text, "lxml")
         self.strip_i_tag_from_soup(soup)
@@ -157,37 +157,37 @@ class LibgenSearch:
         self.ua = UserAgent()
         self.ua_head = {"User-Agent": str(self.ua.firefox)}
 
-    def search_title(self, query):
+    def search_title(self, query, page=1):
         if self.is_plus:
             search_request = PlusSearchRequest(query, search_type="title", headers=self.ua_head)
         else:
             search_request = SearchRequest(query, search_type="title", headers=self.ua_head)
-        return search_request.aggregate_request_data()
+        return search_request.aggregate_request_data(page)
 
-    def search_author(self, query):
+    def search_author(self, query, page=1):
         if self.is_plus:
             search_request = PlusSearchRequest(query, search_type="author", headers=self.ua_head)
         else:
             search_request = SearchRequest(query, search_type="author", headers=self.ua_head)
-        return search_request.aggregate_request_data()
+        return search_request.aggregate_request_data(page)
 
-    def search_title_filtered(self, query, filters, exact_match=True):
+    def search_title_filtered(self, query, filters, exact_match=True, page=1):
         if self.is_plus:
             search_request = PlusSearchRequest(query, search_type="title", headers=self.ua_head)
         else:
             search_request = SearchRequest(query, search_type="title", headers=self.ua_head)
-        results = search_request.aggregate_request_data()
+        results = search_request.aggregate_request_data(page)
         filtered_results = filter_results(
             results=results, filters=filters, exact_match=exact_match
         )
         return filtered_results
 
-    def search_author_filtered(self, query, filters, exact_match=True):
+    def search_author_filtered(self, query, filters, exact_match=True, page=1):
         if self.is_plus:
             search_request = PlusSearchRequest(query, search_type="author", headers=self.ua_head)
         else:
             search_request = SearchRequest(query, search_type="author", headers=self.ua_head)
-        results = search_request.aggregate_request_data()
+        results = search_request.aggregate_request_data(page)
         filtered_results = filter_results(
             results=results, filters=filters, exact_match=exact_match
         )

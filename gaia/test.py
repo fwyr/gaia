@@ -6,7 +6,6 @@ MIRROR_SOURCES = ["GET", "Cloudflare", "IPFS.io", "Infura"]
 
 mirror_1 = "/adsa05c87b5d050a96b013e82e238f6f578OFY00YOW"
 
-
 page = requests.get(f"https://libgen.li/{mirror_1}")
 
 soup = BeautifulSoup(page.text, "html.parser")

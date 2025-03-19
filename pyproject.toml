@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gaia-browser"
-version = "0.3.2"
+version = "0.3.4"
 description = "the terminal-living library genesis browser"
 authors = ["fwyr <fwyr@proton.me>"]
 maintainers = ["fwyr <fwyr@proton.me"]

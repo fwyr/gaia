@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="gaia-browser",
-    version="0.3.2",
+    version="0.3.4",
     author="Ma Weiyi",
     author_email="fwyr@proton.me",
     license="MIT",

@@ -18,6 +18,8 @@ URLS = [
         "https://libgen.rs/",
         "https://libgen.li/"
     ]
+CUR_PAGE = 1
+ACCEPTED_QUERY_TYPES = ["title", "author"]
 
 def clear_console() -> None:
     """
@@ -42,6 +44,7 @@ def show_results(response: list, query: str, query_type: str) -> str:
     clear_console()
     fields = ["Title", "Author", "Year", "Extension"]
     results = []
+    global CUR_PAGE
 
     # only take desired fields
     for item in response:
@@ -50,7 +53,7 @@ def show_results(response: list, query: str, query_type: str) -> str:
             result[field] = item[field]
         results.append(result)
 
-    results_table = Table(title=f"Results for \"{query}\"", box=box.ROUNDED, expand=True)
+    results_table = Table(title=f"Results for \"{query}\", showing page {CUR_PAGE}", box=box.ROUNDED, expand=True)
     results_table.add_column("No.")
     results_table.add_column("Title", style="bold green")
     results_table.add_column("Author", style="cyan")
@@ -59,18 +62,32 @@ def show_results(response: list, query: str, query_type: str) -> str:
 
     for i in range(len(results)):
         result = results[i]
-        results_table.add_row(str(i+1), result["Title"], result["Author"], result["Year"], result["Extension"])
+        results_table.add_row(str((i+1)), result["Title"], result["Author"], result["Year"], result["Extension"])
 
     if len(results):
         console.print(results_table, justify="center")
         print()
-        entry = input("Which entry would you like to download? > ").lower().strip()
-        show_entry(entry, response, results_table)
+        entry = input("Enter desired entry number or 'next' or 'prev' > ").lower().strip()
+        if entry.isdigit():
+            show_entry(entry, response, query, query_type)
+        elif entry == "next" or entry == "prev":
+            if entry == "next":
+                CUR_PAGE += 1
+            else:
+                CUR_PAGE = max(1, CUR_PAGE-1)
+
+            if query_type == "title":
+                res = libgen.search_title(query, page=CUR_PAGE)
+                show_results(res, query, query_type)
+            elif query_type == "author":
+                res = libgen.search_author(query, page=CUR_PAGE)
+                show_results(res, query, query_type)
+
     else:
         return "[bold red]No results found![/bold red]"
 
     
-def show_entry(entry: str, response: list, results_table: Table) -> None:
+def show_entry(entry: str, response: list, query: str, query_type: str) -> None:
     """
     Show more information about a specific entry.
     """
@@ -98,10 +115,7 @@ def show_entry(entry: str, response: list, results_table: Table) -> None:
             console.print(farewell, justify="center")
             sys.exit(0)
         else:
-            clear_console()
-            console.print(results_table, justify="center")
-            entry = input("> ").lower().strip()
-            show_entry(entry, response, results_table)
+            show_results(response, query, query_type)
     else:
         main()
 
@@ -122,8 +136,6 @@ def command_handler(command: str):
     else:
         return "[bold red]Invalid command![/bold red]"
 
-ACCEPTED_QUERY_TYPES = ["title", "author"]
-
 def query_handler(query_type: str):
     if query_type.startswith("."):
         return command_handler(query_type)
@@ -134,21 +146,23 @@ def query_handler(query_type: str):
     if query_type == "title":
         title = input("Title of book? ")
         with console.status("Searching for your title..."):
-            response = libgen.search_title(title)
-        res = show_results(response, title, "Title")
+            response = libgen.search_title(title, page=CUR_PAGE)
+        res = show_results(response, title, query_type)
     elif query_type == "author":
         author = input("Name of author? ")
         with console.status("Searching for your author..."):
-            response = libgen.search_author(author)
-        res = show_results(response, author, "Author")
+            response = libgen.search_author(author, page=CUR_PAGE)
+        res = show_results(response, author, query_type)
 
     return res
 
 def main():
     accepted_query_types = ["title", "author"]
     history = None
+    global CUR_PAGE
     
     while True:
+        CUR_PAGE = 1
         if history:
             console.print(history)
 

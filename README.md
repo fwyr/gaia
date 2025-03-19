@@ -2,6 +2,7 @@
 The terminal-living Library Genesis browser.
 
 ## Installation
+<a href="https://pypi.org/project/gaia-browser/"><img src="https://img.shields.io/pypi/v/gaia-browser.svg"></a>
 ```
 $ pip install gaia-browser
 ```

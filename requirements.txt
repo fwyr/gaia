@@ -1,0 +1,5 @@
+beautifulsoup4==4.13.3
+fake-useragent==2.1.0
+pyfiglet==1.0.2
+rich==13.9.2
+twine==6.1.0
